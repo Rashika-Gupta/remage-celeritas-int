@@ -17,6 +17,7 @@
 
 #include "G4AnalysisManager.hh"
 #include "G4Event.hh"
+#include "G4ThreeVector.hh"
 
 #include "RMGLog.hh"
 #include "RMGOutputManager.hh"
@@ -37,6 +38,11 @@ void RMGVertexOutputScheme::AssignOutputNames(G4AnalysisManager* ana_man) {
     CreateNtupleFOrDColumn(ana_man, vid, "xloc_in_m", fStoreSinglePrecisionPosition);
     CreateNtupleFOrDColumn(ana_man, vid, "yloc_in_m", fStoreSinglePrecisionPosition);
     CreateNtupleFOrDColumn(ana_man, vid, "zloc_in_m", fStoreSinglePrecisionPosition);
+    if (fStorePrimaryDirection) {
+      CreateNtupleFOrDColumn(ana_man, vid, "xdir", fStoreSinglePrecisionPosition);
+      CreateNtupleFOrDColumn(ana_man, vid, "ydir", fStoreSinglePrecisionPosition);
+      CreateNtupleFOrDColumn(ana_man, vid, "zdir", fStoreSinglePrecisionPosition);
+    }
     ana_man->CreateNtupleIColumn(vid, "n_part");
   }
 
@@ -98,6 +104,15 @@ void RMGVertexOutputScheme::StoreEvent(const G4Event* event) {
             primary_vertex->GetZ0() / u::m,
             fStoreSinglePrecisionPosition
         );
+        if (fStorePrimaryDirection) {
+          // direction of the first primary of this vertex (e.g. the optical photon in optical map
+          // simulations), as a unit vector.
+          const auto dir = n_primaries > 0 ? primary_vertex->GetPrimary(0)->GetMomentumDirection()
+                                           : G4ThreeVector();
+          FillNtupleFOrDColumn(ana_man, vntupleid, vcol_id++, dir.x(), fStoreSinglePrecisionPosition);
+          FillNtupleFOrDColumn(ana_man, vntupleid, vcol_id++, dir.y(), fStoreSinglePrecisionPosition);
+          FillNtupleFOrDColumn(ana_man, vntupleid, vcol_id++, dir.z(), fStoreSinglePrecisionPosition);
+        }
         ana_man->FillNtupleIColumn(vntupleid, vcol_id++, n_primaries);
       }
 
@@ -171,6 +186,15 @@ void RMGVertexOutputScheme::DefineCommands() {
       .SetGuidance("Do not store vertex/primary particle data (except the evtid column).")
       .SetGuidance(
           std::string("This is ") + (fSkipPrimaryVertexOutput ? "enabled" : "disabled") + " by default"
+      )
+      .SetParameterName("boolean", true)
+      .SetDefaultValue("true")
+      .SetStates(G4State_Idle);
+
+  fMessenger->DeclareProperty("StorePrimaryDirection", fStorePrimaryDirection)
+      .SetGuidance("Store the momentum direction (unit vector) of the first primary of each vertex.")
+      .SetGuidance(
+          std::string("This is ") + (fStorePrimaryDirection ? "enabled" : "disabled") + " by default"
       )
       .SetParameterName("boolean", true)
       .SetDefaultValue("true")

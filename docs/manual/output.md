@@ -884,6 +884,9 @@ Each row in the table corresponds to a vertex. The columns are:
 - `time`: time relative to the start of the event (zero, most of the times)
 - `n_part`: number of generated particles
 - `xloc`, `yloc`, `zloc`: global coordinates of the vertex position.
+- `xdir`, `ydir`, `zdir`: momentum direction (unit vector) of the first primary
+  particle of the vertex. Only stored if
+  <project:../rmg-commands.md#rmgoutputvertexstoreprimarydirection> is enabled.
 
 The table always lists data from all vertices, i.e. the length of the table is
 always equal to the number of simulated events.

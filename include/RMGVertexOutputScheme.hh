@@ -60,6 +60,7 @@ class RMGVertexOutputScheme : public RMGVOutputScheme {
     bool fStoreSinglePrecisionEnergy = false;
     bool fStoreSinglePrecisionPosition = false;
     bool fSkipPrimaryVertexOutput = false;
+    bool fStorePrimaryDirection = false;
 };
 
 #endif
